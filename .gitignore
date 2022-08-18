@@ -1,4 +1,7 @@
+# custom
 .ipynb_checkpoints
+*.ipynb
+data/
 .idea/
 .idea/*
 # vscode
