@@ -58,7 +58,7 @@ class Dataset():
         print('\n======= 다운로드 완료 =======')
 
 
-def list_all():
+def list():
     ret = pd.read_csv(DATASET_URL).iloc[:, :-1]
     ret.columns = ['데이터셋', '설명']
     return ret
