@@ -5,17 +5,19 @@ import os
 import zipfile
 
 
-# 데이터셋 파일 경로 (dropbox 림크)
-DATASET_URL = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
-METADATA_URL = 'https://www.dropbox.com/s/9y1nyvwy95jh2w3/metadata.csv?dl=1'
-
-
 class Dataset():
-    def __init__(self, name, desc, _id, data_dir='data'):
+    def __init__(self, name, desc, _id, data_dir='data', alt_url=True):
         self.name = name
         self.desc = desc
         self.data_dir = data_dir
         self.id = _id
+        self.alt_url = alt_url
+        
+        # Dropbox Dataset
+        self.dataset_url = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
+        if alt_url:
+            # Jaen Dataset
+            self.dataset_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fdataset.csv'
 
         # data 폴더 생성
         if not os.path.exists(data_dir):
@@ -24,14 +26,24 @@ class Dataset():
         self.load_metadata()
 
     def load_metadata(self):
-        metadata = pd.read_csv(METADATA_URL)
-        self.meta = {i: v for i, v in metadata.loc[metadata['id'] == self.id, ['filename', 'url']].values}
+        metadata_url = 'https://www.dropbox.com/s/9y1nyvwy95jh2w3/metadata.csv?dl=1'
+        cols = ['filename', 'url']
+        if self.alt_url:
+            metadata_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fmetadata.csv'
+            cols = ['filename', 'alt_url']
+            
+        metadata = pd.read_csv(metadata_url)
+        self.meta = {i: v for i, v in metadata.loc[metadata['id'] == self.id, cols].values}
 
     def download(self):
         print('======= 다운로드 시작 =======\n')
+        dir_name = os.path.join(self.data_dir, self.name)
+        if not os.path.isdir(dir_name):
+            os.mkdir(dir_name)
+            
         for idx, (filename, url) in enumerate(self.meta.items()):
             r = requests.get(url, stream=True)
-            filepath = os.path.join(self.data_dir, filename)
+            filepath = os.path.join(dir_name, filename)
 
             ## 다운로드 progress bar 추가 ##
             total_size_in_bytes = int(r.headers.get('content-length', 0))
@@ -53,20 +65,36 @@ class Dataset():
             else:
                 if filepath.endswith('.zip'):
                     print(f'압축 해제 및 프로젝트 파일 구성중...')
-                    zipfile.ZipFile(filepath).extractall(os.path.join(self.data_dir, project_name))
+                    zipfile.ZipFile(filepath).extractall(dir_name)
+                    if os.path.isfile(filepath):
+                        os.remove(filepath)
 
         print('\n======= 다운로드 완료 =======')
 
 
-def list():
-    ret = pd.read_csv(DATASET_URL).iloc[:, :-1]
+def list(alt_url=True):
+    download_url = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
+    if alt_url:
+        download_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fdataset.csv'
+        print('[서버] Jaen')
+    else:
+        print('[서버] Dropbox')
+    print(download_url)
+    ret = pd.read_csv(download_url).iloc[:, :-1]
     ret.columns = ['데이터셋', '설명']
     return ret
 
 
-def download(name, data_dir='data'):
-    ds = pd.read_csv(DATASET_URL)
+def download(name, data_dir='data', alt_url=True):
+    download_url = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
+    if alt_url:
+        download_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fdataset.csv'
+        print('[서버] Jaen')
+    else:
+        print('[서버] Dropbox')
+    
+    ds = pd.read_csv(download_url)
     row = ds.loc[ds['data'] == name]
     if len(row) > 0:
-        dataset = Dataset(row['data'], row['data_desc'], row['id'].iloc[0], data_dir=data_dir)
+        dataset = Dataset(row['data'].values[0], row['data_desc'], row['id'].iloc[0], data_dir=data_dir)
         dataset.download()
