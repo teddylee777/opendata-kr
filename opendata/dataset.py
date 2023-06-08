@@ -35,9 +35,13 @@ class Dataset():
         metadata = pd.read_csv(metadata_url)
         self.meta = {i: v for i, v in metadata.loc[metadata['id'] == self.id, cols].values}
 
-    def download(self):
+    def download(self, path=None):
         print('======= 다운로드 시작 =======\n')
-        dir_name = os.path.join(self.data_dir, self.name)
+        if path is None:
+            dir_name = os.path.join(self.data_dir, self.name)
+        else:
+            dir_name = path
+            
         if not os.path.isdir(dir_name):
             os.mkdir(dir_name)
             
@@ -85,7 +89,7 @@ def list(alt_url=True):
     return ret
 
 
-def download(name, data_dir='data', alt_url=True):
+def download(name, data_dir='data', alt_url=True, path=None):
     download_url = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
     if alt_url:
         download_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fdataset.csv'
@@ -97,4 +101,4 @@ def download(name, data_dir='data', alt_url=True):
     row = ds.loc[ds['data'] == name]
     if len(row) > 0:
         dataset = Dataset(row['data'].values[0], row['data_desc'], row['id'].iloc[0], data_dir=data_dir)
-        dataset.download()
+        dataset.download(path=path)
