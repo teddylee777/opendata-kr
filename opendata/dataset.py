@@ -14,7 +14,7 @@ class Dataset():
         self.alt_url = alt_url
         
         # Dropbox Dataset
-        self.dataset_url = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
+        self.dataset_url = 'https://www.dropbox.com/s/dmk6sti3m254w6o/dataset.csv?dl=1'
         if alt_url:
             # Jaen Dataset
             self.dataset_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fdataset.csv'
@@ -26,7 +26,7 @@ class Dataset():
         self.load_metadata()
 
     def load_metadata(self):
-        metadata_url = 'https://www.dropbox.com/s/9y1nyvwy95jh2w3/metadata.csv?dl=1'
+        metadata_url = 'https://www.dropbox.com/s/gjeoilz9bm8lzgg/metadata.csv?dl=1'
         cols = ['filename', 'url']
         if self.alt_url:
             metadata_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fmetadata.csv'
@@ -80,9 +80,6 @@ def list(alt_url=True):
     download_url = 'https://www.dropbox.com/s/95wzfrmoc4qrfvw/dataset.csv?dl=1'
     if alt_url:
         download_url = 'http://data.jaen.kr/download?download_path=%2Fdata%2Ffiles%2FmySUNI%2Fdatasets%2F000-metadata%2Fdataset.csv'
-        print('[서버] Jaen')
-    else:
-        print('[서버] Dropbox')
     print(download_url)
     ret = pd.read_csv(download_url).iloc[:, :-1]
     ret.columns = ['데이터셋', '설명']
