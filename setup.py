@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="opendata-kr",
-    version="0.0.8",
+    version="0.0.9",
     description="Sample Datasets for Beginners",
     author="Teddy Lee",
     author_email="teddylee777@gmail.com",
